@@ -15,39 +15,93 @@ Your application must make use of the following libraries:
 
 ## Steps to Completion
 
-### 1. Plan to Meet Requirements
+### 1. DB Creation and Migrations
+- connect to database postgres
 
-In this repo there is a `REQUIREMENTS.md` document which outlines what this API needs to supply for the frontend, as well as the agreed upon data shapes to be passed between front and backend. This is much like a document you might come across in real life when building or extending an API. 
+- after that run migration script up: 
+    `npm run migrate:up`
 
-Your first task is to read the requirements and update the document with the following:
-- Determine the RESTful route for each endpoint listed. Add the RESTful route and HTTP verb to the document so that the frontend developer can begin to build their fetch requests.    
-**Example**: A SHOW route: 'blogs/:id' [GET] 
+- if you want to drop all table run migration down:
+    `npm run migrate:down`
 
-- Design the Postgres database tables based off the data shape requirements. Add to the requirements document the database tables and columns being sure to mark foreign keys.   
-**Example**: You can format this however you like but these types of information should be provided
-Table: Books (id:varchar, title:varchar, author:varchar, published_year:varchar, publisher_id:string[foreign key to publishers table], pages:number)
+- file enviroment to connect database postgres example:
+    POSTGRES_HOST=127.0.0.1
+    POSTGRES_DB=storefront_db
+    POSTGRES_USER=postgres
+    POSTGRES_PASSWORD=postgres
+    SALT_ROUNDS=10
+    BCRYPT_PASSWORD=hash-happy
+    TOKEN_SECRET=hard-secret
 
-**NOTE** It is important to remember that there might not be a one to one ratio between data shapes and database tables. Data shapes only outline the structure of objects being passed between frontend and API, the database may need multiple tables to store a single shape. 
+### 2. Models
 
-### 2.  DB Creation and Migrations
+- create Models
 
-Now that you have the structure of the databse outlined, it is time to create the database and migrations. Add the npm packages dotenv and db-migrate that we used in the course and setup your Postgres database. If you get stuck, you can always revisit the database lesson for a reminder. 
+=> userModels method:
 
-You must also ensure that any sensitive information is hashed with bcrypt. If any passwords are found in plain text in your application it will not pass.
+ - index() : show all users
 
-### 3. Models
+ - show(id): show user by userId
 
-Create the models for each database table. The methods in each model should map to the endpoints in `REQUIREMENTS.md`. Remember that these models should all have test suites and mocks.
+ - create(user): create new user
 
-### 4. Express Handlers
+ - authentication(username, password): method use to authen user login
 
-Set up the Express handlers to route incoming requests to the correct model method. Make sure that the endpoints you create match up with the enpoints listed in `REQUIREMENTS.md`. Endpoints must have tests and be CORS enabled. 
+=> ProductModel method:
 
-### 5. JWTs
+ - index() : show all product
 
-Add JWT functionality as shown in the course. Make sure that JWTs are required for the routes listed in `REQUIUREMENTS.md`.
+ - show(id): show product by productId
 
-### 6. QA and `README.md`
+ - create(user): create new product
+
+ - filterByCategory(category): method use to filter product by category
+
+ => OrderModel method:
+ 
+ - index() : show all orders
+
+ - getOrderByUser(userId): show order by userid
+
+ - create(user): create new order
+
+### 3. Express Handlers
+
+Set up the Express handlers to route incoming requests to the correct model method. Endpoints must have tests and be CORS enabled. 
+
+- user router:
+
+    app.get("/users", verifyAuthTokenMiddleware, index)
+
+    app.get("/user/:id", verifyAuthTokenMiddleware, show)
+
+    app.post("/user", verifyAuthTokenMiddleware, create)
+
+    app.post("/login", login)
+
+- product router:
+
+    app.get("/products", index)
+
+    app.get("/product/:id", show)
+
+    app.post("/product", verifyAuthTokenMiddleware ,create)
+
+    app.get("/product", filterByCategory)
+
+- order router:
+
+    app.get("/orders", index)
+
+    app.get("/order/:userId",verifyAuthTokenMiddleware, show)
+
+    app.post("/order", verifyAuthTokenMiddleware,create)
+
+### 4. JWTs
+
+Add JWT verifyAuthTokenMiddleware . Make sure that JWTs are required for the routes listed.
+
+### 5. QA and `README.md`
 
 Before submitting, make sure that your project is complete with a `README.md`. Your `README.md` must include instructions for setting up and running your project including how you setup, run, and connect to your database. 
 

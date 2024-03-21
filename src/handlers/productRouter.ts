@@ -1,5 +1,6 @@
 import { ProductModel } from "../models/productsModel";
 import express, { Request, Response } from "express";
+import { verifyAuthTokenMiddleware } from "../util/verifyAuthToken";
 
 
 const store = new ProductModel();
@@ -41,7 +42,6 @@ const create = async (req: Request, res: Response) => {
 const filterByCategory = async (req: Request, res: Response) => {
     try {
         const { category } = req.body;
-
         const createNewProduct = await store.filterByCategory(category ?? "laptop");
         res.json(createNewProduct)
     } catch (error) {
@@ -53,7 +53,7 @@ const filterByCategory = async (req: Request, res: Response) => {
 const productRoute = (app: express.Application) => {
     app.get("/products", index),
     app.get("/product/:id", show),
-    app.post("/product", create),
+    app.post("/product", verifyAuthTokenMiddleware ,create),
     app.get("/product", filterByCategory)
 }
 

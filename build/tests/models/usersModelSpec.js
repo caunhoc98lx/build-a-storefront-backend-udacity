@@ -12,98 +12,111 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const productsModel_1 = require("../../models/productsModel");
+const usersModel_1 = require("../../models/usersModel");
 const database_1 = __importDefault(require("../../database"));
-describe('Product models', () => {
+const bcrypt_1 = __importDefault(require("bcrypt"));
+describe('User models', () => {
     let mockClient;
-    let productStore;
+    let userStore;
+    let mockBcrypt;
     beforeEach(() => {
         // Initialize the instance before each test
-        productStore = new productsModel_1.ProductModel();
+        userStore = new usersModel_1.UserModel();
         mockClient = spyOn(database_1.default, 'connect');
+        mockBcrypt = spyOn(bcrypt_1.default, "compareSync");
     });
+    const mockDataUserTest = [
+        {
+            id: 1,
+            firstName: 'user',
+            lastName: "test",
+            username: "usertest1",
+            password: "password123"
+        }
+    ];
     describe('index() method', () => {
         it('should have index method define', () => {
-            expect(productStore.index()).toBeDefined();
+            expect(userStore.index()).toBeDefined();
         });
-        it("index method should return list all product", () => __awaiter(void 0, void 0, void 0, function* () {
+        it("index method should return list all user", () => __awaiter(void 0, void 0, void 0, function* () {
             mockClient.and.returnValue({
                 query: () => __awaiter(void 0, void 0, void 0, function* () {
                     return ({
-                        rows: [{ id: 1, name: 'Product 1' }, { id: 2, name: 'Product 2' }] // Mock rows data
+                        rows: mockDataUserTest // Mock rows data
                     });
                 }),
                 release: () => { } // Mock release method
             });
-            const result = yield productStore.index();
-            expect(result).toEqual([{ id: 1, name: 'Product 1' }, { id: 2, name: 'Product 2' }]);
+            const result = yield userStore.index();
+            expect(result).toEqual(mockDataUserTest);
         }));
         it("should throw an error if unable to get products", () => __awaiter(void 0, void 0, void 0, function* () {
             mockClient.and.throwError("Connection error");
-            yield expectAsync(productStore.index()).toBeRejectedWithError("Cannot get any product");
+            yield expectAsync(userStore.index()).toBeRejectedWithError("Cannot get any users");
         }));
     });
     describe('show() method', () => {
         it('should have show method define', () => {
-            expect(productStore.show()).toBeDefined();
+            expect(userStore.show()).toBeDefined();
+        });
+        it("show method should return a user by id", () => __awaiter(void 0, void 0, void 0, function* () {
+            mockClient.and.returnValue({
+                query: () => __awaiter(void 0, void 0, void 0, function* () {
+                    return ({
+                        rows: mockDataUserTest // Mock rows data
+                    });
+                }),
+                release: () => { } // Mock release method
+            });
+            const result = yield userStore.show(1);
+            expect(result).toEqual(mockDataUserTest[0]);
+        }));
+        it("should throw an error if unable to get products", () => __awaiter(void 0, void 0, void 0, function* () {
+            mockClient.and.throwError("Connection error");
+            yield expectAsync(userStore.show()).toBeRejectedWithError("Cannot found current user");
+        }));
+    });
+    describe('create() method', () => {
+        it('should have creatre method define', () => {
+            expect(userStore.create()).toBeDefined();
         });
         it("show method should return a product by id", () => __awaiter(void 0, void 0, void 0, function* () {
             mockClient.and.returnValue({
                 query: () => __awaiter(void 0, void 0, void 0, function* () {
                     return ({
-                        rows: [{ id: 1, name: 'Product 1' }] // Mock rows data
+                        rows: mockDataUserTest // Mock rows data
                     });
                 }),
                 release: () => { } // Mock release method
             });
-            const result = yield productStore.show(1);
-            expect(result).toEqual({ id: 1, name: 'Product 1' });
+            const result = yield userStore.create(mockDataUserTest[0]);
+            expect(result).toEqual(mockDataUserTest[0]);
         }));
         it("should throw an error if unable to get products", () => __awaiter(void 0, void 0, void 0, function* () {
             mockClient.and.throwError("Connection error");
-            yield expectAsync(productStore.show()).toBeRejectedWithError("Cannot found current product");
+            yield expectAsync(userStore.create(mockDataUserTest[0])).toBeRejectedWithError("Cannot create new user");
         }));
     });
-    describe('create() method', () => {
-        it('should have create method define', () => {
-            expect(productStore.create()).toBeDefined();
+    describe('authentication() method', () => {
+        it('should have authentication method define', () => {
+            expect(userStore.authentication()).toBeDefined();
         });
         it("create method should return a new product after created", () => __awaiter(void 0, void 0, void 0, function* () {
             mockClient.and.returnValue({
                 query: () => __awaiter(void 0, void 0, void 0, function* () {
                     return ({
-                        rows: [{ id: 1, name: 'Product 1', price: 120000, category: "test" }] // Mock rows data
+                        rows: [{ username: "usertest", password: "password123" }] // Mock rows data
                     });
                 }),
                 release: () => { } // Mock release method
             });
-            const result = yield productStore.create({ id: 1, name: 'Product 1', price: 120000, category: "test" });
-            expect(result).toEqual({ id: 1, name: 'Product 1', price: 120000, category: "test" });
+            mockBcrypt.and.returnValue(true);
+            const result = yield userStore.authentication({ username: "usertest", password: "password123" });
+            expect(result).toEqual({ username: "usertest", password: "password123" });
         }));
-        it("should throw an error if unable to create new product", () => __awaiter(void 0, void 0, void 0, function* () {
+        it("should throw an error if authentication error", () => __awaiter(void 0, void 0, void 0, function* () {
             mockClient.and.throwError("Connection error");
-            yield expectAsync(productStore.create()).toBeRejectedWithError("Cannot create new product");
-        }));
-    });
-    describe('filterByCategory() method', () => {
-        it('should have filterByCategory method define', () => {
-            expect(productStore.filterByCategory()).toBeDefined();
-        });
-        it("filterByCategory method should return a list products by category", () => __awaiter(void 0, void 0, void 0, function* () {
-            mockClient.and.returnValue({
-                query: () => __awaiter(void 0, void 0, void 0, function* () {
-                    return ({
-                        rows: [{ id: 1, name: 'Product 1', price: 120000, category: "test 1" }, { id: 2, name: 'Product 2', price: 140000, category: "test 1" }] // Mock rows data
-                    });
-                }),
-                release: () => { } // Mock release method
-            });
-            const result = yield productStore.filterByCategory("test 1");
-            expect(result).toEqual([{ id: 1, name: 'Product 1', price: 120000, category: "test 1" }, { id: 2, name: 'Product 2', price: 140000, category: "test 1" }]);
-        }));
-        it("should throw an error if unable to filter by category product", () => __awaiter(void 0, void 0, void 0, function* () {
-            mockClient.and.throwError("Connection error");
-            yield expectAsync(productStore.filterByCategory()).toBeRejectedWithError("Cannot filter by category");
+            yield expectAsync(userStore.authentication()).toBeRejectedWithError("Authentication error");
         }));
     });
 });

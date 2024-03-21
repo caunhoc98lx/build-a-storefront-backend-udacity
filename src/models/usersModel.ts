@@ -1,4 +1,5 @@
 import client from "../database"
+import bcrypt from "bcrypt"
 
 export interface IUser {
     id: number
@@ -29,7 +30,7 @@ export class UserModel {
         }
     }
 
-    async show(id: string): Promise<IUser[]> {
+    async show(id: string): Promise<IUser> {
         try {
             const connect = await client.connect();
 
@@ -47,11 +48,29 @@ export class UserModel {
             const sqlQuery = "INSERT INTO users (firstname, lastname, username, password) VALUES ($1, $2, $3, $4) RETURNING *";
             const connect = await client.connect();
 
-            const result = await connect.query(sqlQuery, [user.firstName, user.lastName, user.username,user.password]);
+            const result = await connect.query(sqlQuery, [user.firstName, user.lastName, user.username, user.password]);
             connect.release();
+            
             return result.rows[0];
         } catch (error) {
             throw new Error("Cannot create new user")
+        }
+    }
+
+    async authentication(username: string, password: string) {
+        try {
+            const connect = await client.connect();
+            const sqlQuery = "SELECT username, password FROM public.users WHERE username = ($1)";
+            const result = await connect.query(sqlQuery, [username]);
+            if (result.rows.length) {
+                const user = result.rows[0];
+                if (bcrypt.compareSync(password, user.password)) {
+                    return user;
+                }
+            }
+            return null;
+        } catch (error) {
+            throw new Error("Authentication error");
         }
     }
 }

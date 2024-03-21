@@ -1,7 +1,11 @@
-import { IUser, UserModel } from "../models/usersModel";
+import { UserModel } from "../models/usersModel";
 import express, { Request, Response } from "express";
-import bcrypt from 'bcrypt'
+import bcrypt from 'bcrypt';
+import jwt from 'jsonwebtoken'
+import dotenv from 'dotenv';
+import { verifyAuthTokenMiddleware } from "../util/verifyAuthToken";
 
+dotenv.config();
 
 const store = new UserModel();
 
@@ -13,7 +17,6 @@ const index = async (_req: Request, res: Response) => {
         res.status(400);
         res.json(error)
     }
-
 }
 
 const show = async (_req: Request, res: Response) => {
@@ -25,27 +28,37 @@ const show = async (_req: Request, res: Response) => {
         res.status(400);
         res.json(error)
     }
-
 }
 
 const create = async (req: Request, res: Response) => {
     try {
         const { firstName, lastName, username, password } = req.body;
-        bcrypt.genSalt(10, async (err, salt) => {
-            const createNewUser = await store.create({ firstName, lastName, username, password: salt });
-            res.json(createNewUser)
-        })
+        const createNewUser = await store.create({ firstName, lastName, username, password: bcrypt.hashSync(password, 10) });
+        res.json(createNewUser)
     } catch (error) {
         res.status(400)
         res.json(error)
     }
-
 }
 
+const login = async (req: Request, res: Response) => {
+    try {
+        const { username, password } = req.body;
+        const authen = await store.authentication(username, password);
+        const token = jwt.sign({ user: authen }, "hard-secret");
+        res.json(token);
+    } catch (error) {
+        res.status(400);
+        res.json(error);
+    }
+}
+
+
 const userRoute = (app: express.Application) => {
-    app.get("/users", index),
-    app.get("/user/:id", show),
-    app.post("/user", create)
+    app.get("/users", verifyAuthTokenMiddleware, index),
+    app.get("/user/:id", verifyAuthTokenMiddleware, show),
+    app.post("/user", verifyAuthTokenMiddleware, create),
+    app.post("/login", login)
 }
 
 export default userRoute;

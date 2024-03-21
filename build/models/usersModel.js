@@ -12,20 +12,21 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ProductModel = void 0;
+exports.UserModel = void 0;
 const database_1 = __importDefault(require("../database"));
-class ProductModel {
+const bcrypt_1 = __importDefault(require("bcrypt"));
+class UserModel {
     index() {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const connect = yield database_1.default.connect();
-                const sqlQuery = "select * from products;";
+                const sqlQuery = "SELECT * FROM users;";
                 const result = yield connect.query(sqlQuery);
                 connect.release();
                 return result.rows;
             }
             catch (error) {
-                throw new Error("Cannot get any product");
+                throw new Error("Cannot get any users");
             }
         });
     }
@@ -33,43 +34,48 @@ class ProductModel {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const connect = yield database_1.default.connect();
-                const sqlQuery = `SELECT * FROM products where id = ($1)`;
+                const sqlQuery = `SELECT * FROM users where id = ($1)`;
                 const result = yield connect.query(sqlQuery, [id]);
                 connect.release();
                 return result.rows[0];
             }
             catch (error) {
-                throw new Error("Cannot found current product");
+                throw new Error("Cannot found current user");
             }
         });
     }
-    create(prouduct) {
+    create(user) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const sqlQuery = "INSERT INTO products (name, price, category) VALUES ($1, $2, $3) RETURNING *";
+                const sqlQuery = "INSERT INTO users (firstname, lastname, username, password) VALUES ($1, $2, $3, $4) RETURNING *";
                 const connect = yield database_1.default.connect();
-                const result = yield connect.query(sqlQuery, [prouduct.name, prouduct.price, prouduct.category]);
+                const result = yield connect.query(sqlQuery, [user.firstName, user.lastName, user.username, user.password]);
                 connect.release();
                 return result.rows[0];
             }
             catch (error) {
-                throw new Error("Cannot create new product");
+                throw new Error("Cannot create new user");
             }
         });
     }
-    filterByCategory(nameCategory) {
+    authentication(username, password) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
-                const sqlQuery = "SELECT * FROM products WHERE category = ($1)";
                 const connect = yield database_1.default.connect();
-                const result = yield connect.query(sqlQuery, [nameCategory]);
-                connect.release();
-                return result.rows;
+                const sqlQuery = "SELECT username, password FROM public.users WHERE username = ($1)";
+                const result = yield connect.query(sqlQuery, [username]);
+                if (result.rows.length) {
+                    const user = result.rows[0];
+                    if (bcrypt_1.default.compareSync(password, user.password)) {
+                        return user;
+                    }
+                }
+                return null;
             }
             catch (error) {
-                throw new Error("Cannot filter by category");
+                throw new Error("Authentication error");
             }
         });
     }
 }
-exports.ProductModel = ProductModel;
+exports.UserModel = UserModel;
