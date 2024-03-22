@@ -3,15 +3,11 @@ import client from "../database"
 export interface IOrder {
     id: number
     userId: number
-    productId: number
-    quantity: number
     status: string
 }
 
 interface IOrderCreate {
     userId: number
-    productId: number
-    quantity: number
     status: string
 }
 
@@ -44,10 +40,10 @@ export class OrderModel {
 
     async create(order: IOrderCreate): Promise<IOrder> {
         try {
-            const sqlQuery = "INSERT INTO orders (user_id, product_id, quantity, status) VALUES ($1, $2, $3, $4) RETURNING *";
+            const sqlQuery = "INSERT INTO orders (user_id, status) VALUES ($1, $2) RETURNING *";
             const connect = await client.connect();
 
-            const result = await connect.query(sqlQuery, [order.userId, order.productId, order.quantity,order.status]);
+            const result = await connect.query(sqlQuery, [order.userId,order.status]);
             connect.release();
             return result.rows[0];
         } catch (error) {

@@ -28,16 +28,12 @@ describe('Order models', () => {
     const mockDataOrderTest = [
         {
             "id": 2,
-            "product_id": 7,
             "user_id": 1,
-            "quantity": 2,
             "status": "active"
         },
         {
             "id": 6,
-            "product_id": 11,
             "user_id": 3,
-            "quantity": 3,
             "status": "active"
         }
     ];

@@ -66,7 +66,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 const userRoute = (app) => {
     app.get("/users", verifyAuthToken_1.verifyAuthTokenMiddleware, index),
         app.get("/user/:id", verifyAuthToken_1.verifyAuthTokenMiddleware, show),
-        app.post("/user", verifyAuthToken_1.verifyAuthTokenMiddleware, create),
+        app.post("/user", create),
         app.post("/login", login);
 };
 exports.default = userRoute;

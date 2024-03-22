@@ -11,15 +11,17 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 const orderModel_1 = require("../models/orderModel");
 const usersModel_1 = require("../models/usersModel");
+const orderProductModel_1 = require("../models/orderProductModel");
 const productsModel_1 = require("../models/productsModel");
 const verifyAuthToken_1 = require("../util/verifyAuthToken");
 const orderStore = new orderModel_1.OrderModel();
 const userStore = new usersModel_1.UserModel();
+const orderProductsStore = new orderProductModel_1.OrderProductsModel();
 const productStore = new productsModel_1.ProductModel();
 const index = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const listUsers = yield orderStore.index();
-        res.json(listUsers);
+        const listOrder = yield orderStore.index();
+        res.json(listOrder);
     }
     catch (error) {
         res.status(400);
@@ -39,19 +41,31 @@ const show = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
 });
 const create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const { userId, productId, quantity, status } = req.body;
+        const { userId, orderProducts, status } = req.body;
         const existingUser = yield userStore.show(userId);
         if (!existingUser) {
             res.status(404);
             res.json("Cannot found user");
         }
-        const existingProduct = yield productStore.show(productId);
-        if (!existingProduct) {
-            res.status(404);
-            res.json("Cannot found product");
+        const createNewOrder = yield orderStore.create({ userId, status });
+        if (createNewOrder) {
+            // create order product
+            const createProductOrder = yield Promise.allSettled(orderProducts.length > 0 && (orderProducts === null || orderProducts === void 0 ? void 0 : orderProducts.map((item) => __awaiter(void 0, void 0, void 0, function* () {
+                const existingProduct = yield productStore.show(item.productId);
+                if (existingProduct) {
+                    yield orderProductsStore.create({ orderId: createNewOrder.id, productId: item.productId, quantity: item.quantity });
+                }
+                else {
+                    Promise.reject(`Product not found with id: ${item.productId}`);
+                }
+            }))));
+            res.json({
+                id: createNewOrder.id,
+                userId: createNewOrder.userId,
+                status: createNewOrder.status,
+                orderProducts: createProductOrder
+            });
         }
-        const createNewOrder = yield orderStore.create({ userId, productId, quantity, status });
-        res.json(createNewOrder);
     }
     catch (error) {
         res.status(400);

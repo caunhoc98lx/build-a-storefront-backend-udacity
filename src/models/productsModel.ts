@@ -27,7 +27,7 @@ export class ProductModel {
         }
     }
 
-    async show(id: string): Promise<IProduct> {
+    async show(id: number): Promise<IProduct> {
         try {
             const connect = await client.connect();
 

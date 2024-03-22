@@ -12,50 +12,36 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OrderModel = void 0;
+exports.OrderProductsModel = void 0;
 const database_1 = __importDefault(require("../database"));
-class OrderModel {
-    index() {
+class OrderProductsModel {
+    getListProductByOrder(orderId) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
                 const connect = yield database_1.default.connect();
-                const sqlQuery = "SELECT * FROM orders;";
-                const result = yield connect.query(sqlQuery);
+                const sqlQuery = `SELECT * FROM order_products where order_id = ($1)`;
+                const result = yield connect.query(sqlQuery, [orderId]);
                 connect.release();
                 return result.rows;
             }
             catch (error) {
-                throw new Error("Cannot get any orders");
+                throw new Error("Cannot found any  product by order id");
             }
         });
     }
-    getOrderByUser(userId) {
+    create(orderProduct) {
         return __awaiter(this, void 0, void 0, function* () {
             try {
+                const sqlQuery = "INSERT INTO order_products (order_id, product_id, quantity) VALUES ($1, $2, $3) RETURNING *";
                 const connect = yield database_1.default.connect();
-                const sqlQuery = `SELECT * FROM orders where user_id = ($1)`;
-                const result = yield connect.query(sqlQuery, [userId]);
-                connect.release();
-                return result.rows;
-            }
-            catch (error) {
-                throw new Error("Cannot found any orders of current user");
-            }
-        });
-    }
-    create(order) {
-        return __awaiter(this, void 0, void 0, function* () {
-            try {
-                const sqlQuery = "INSERT INTO orders (user_id, status) VALUES ($1, $2) RETURNING *";
-                const connect = yield database_1.default.connect();
-                const result = yield connect.query(sqlQuery, [order.userId, order.status]);
+                const result = yield connect.query(sqlQuery, [orderProduct.orderId, orderProduct.productId, orderProduct.quantity]);
                 connect.release();
                 return result.rows[0];
             }
             catch (error) {
-                throw new Error("Cannot create new order of user");
+                throw new Error("Cannot create new orderProduct");
             }
         });
     }
 }
-exports.OrderModel = OrderModel;
+exports.OrderProductsModel = OrderProductsModel;

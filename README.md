@@ -71,31 +71,65 @@ Set up the Express handlers to route incoming requests to the correct model meth
 
 - user router:
 
-    app.get("/users", verifyAuthTokenMiddleware, index)
+    ## app.get("/users", verifyAuthTokenMiddleware, index)
 
-    app.get("/user/:id", verifyAuthTokenMiddleware, show)
+    ## app.get("/user/:id", verifyAuthTokenMiddleware, show)
 
-    app.post("/user", verifyAuthTokenMiddleware, create)
+    ## app.post("/user", create)
+    example request body 
+    {
+        "firstName": "Nguyen",
+        "lastName": "Linh",
+        "username": "nguyenlinh",
+        "password": "password123"
+    }
 
-    app.post("/login", login)
+    ## app.post("/login", login)
+    example request body 
+    {
+        "username": "usertest",
+        "password": "password123"
+    }
 
 - product router:
 
-    app.get("/products", index)
+    ## app.get("/products", index)
 
-    app.get("/product/:id", show)
+    ## app.get("/product/:id", show)
 
-    app.post("/product", verifyAuthTokenMiddleware ,create)
+    ## app.post("/product", verifyAuthTokenMiddleware ,create)
+    example request body 
+    {
+        "name": "Xiaomi Redmi Note 13 6GB 128GB",
+        "price": 8790000,
+        "category": "Phone"
+    }
 
-    app.get("/product", filterByCategory)
+    ## app.get("/product", filterByCategory)
 
 - order router:
 
-    app.get("/orders", index)
+    ## app.get("/orders", index)
 
-    app.get("/order/:userId",verifyAuthTokenMiddleware, show)
+    ## app.get("/order/:userId",verifyAuthTokenMiddleware, show)
 
-    app.post("/order", verifyAuthTokenMiddleware,create)
+
+    ## app.post("/order", verifyAuthTokenMiddleware,create)
+    example body
+        {
+            "userId": 5,
+            "status": "active",
+            "orderProducts": [
+                {
+                    "productId": 8,
+                    "quantity": 3
+                },
+                {
+                    "productId": 10,
+                    "quantity": 1
+                }
+            ]
+        }
 
 ### 4. JWTs
 

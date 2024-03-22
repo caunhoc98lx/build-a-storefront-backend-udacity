@@ -25,7 +25,7 @@ const index = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
 const show = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const { id } = _req.params;
-        const getProduct = yield store.show(id);
+        const getProduct = yield store.show(parseInt(id));
         res.json(getProduct);
     }
     catch (error) {

@@ -57,7 +57,7 @@ const login = async (req: Request, res: Response) => {
 const userRoute = (app: express.Application) => {
     app.get("/users", verifyAuthTokenMiddleware, index),
     app.get("/user/:id", verifyAuthTokenMiddleware, show),
-    app.post("/user", verifyAuthTokenMiddleware, create),
+    app.post("/user", create),
     app.post("/login", login)
 }
 
