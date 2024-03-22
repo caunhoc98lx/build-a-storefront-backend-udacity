@@ -135,7 +135,32 @@ Set up the Express handlers to route incoming requests to the correct model meth
 
 Add JWT verifyAuthTokenMiddleware . Make sure that JWTs are required for the routes listed.
 
-### 5. QA and `README.md`
+### 5. Data Shapes
+### products
+ -  id
+ - name
+ - price
+ - category
+
+### orders
+ - id
+ - user_id
+ - status
+
+### order_product
+ - id
+ - order_id
+ - product_id
+ - quantity
+
+### users
+ - id
+ - firstname
+ - lastname
+ - username
+ - password
+
+### 6. QA and `README.md`
 
 Before submitting, make sure that your project is complete with a `README.md`. Your `README.md` must include instructions for setting up and running your project including how you setup, run, and connect to your database. 
 

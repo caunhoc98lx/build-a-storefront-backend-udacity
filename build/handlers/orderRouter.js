@@ -53,12 +53,11 @@ const create = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             const createProductOrder = yield Promise.allSettled(orderProducts.length > 0 && (orderProducts === null || orderProducts === void 0 ? void 0 : orderProducts.map((item) => __awaiter(void 0, void 0, void 0, function* () {
                 const existingProduct = yield productStore.show(item.productId);
                 if (existingProduct) {
-                    yield orderProductsStore.create({ orderId: createNewOrder.id, productId: item.productId, quantity: item.quantity });
+                    return yield orderProductsStore.create({ orderId: createNewOrder.id, productId: item.productId, quantity: item.quantity });
                 }
-                else {
-                    Promise.reject(`Product not found with id: ${item.productId}`);
-                }
-            }))));
+            })))).then(result => result).catch(error => {
+                throw new Error(error === null || error === void 0 ? void 0 : error.message);
+            });
             res.json({
                 id: createNewOrder.id,
                 userId: createNewOrder.userId,

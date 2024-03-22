@@ -9,7 +9,7 @@
     "lint:fix": "eslint --fix .",
     "format": "prettier --ignore-path .gitignore --write \"**/*.+(js|ts|json)\"",
     "watch": "tsc-watch --esModuleInterop src/server.ts --outDir ./dist --onSuccess \"node ./dist/server.js\"",
-    "test": "npm run build & npm run jasmine",
+    "test": "db-migrate --env test up && npm run build && npm run jasmine && db-migrate db:drop test",
     "jasmine": "jasmine",
     "tsc": "tsc",
     "build": "npx tsc",
