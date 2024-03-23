@@ -142,16 +142,54 @@ Add JWT verifyAuthTokenMiddleware . Make sure that JWTs are required for the rou
  - price
  - category
 
+                                     Table "public.products"
+  Column  |          Type          | Collation | Nullable |               Default
+----------+------------------------+-----------+----------+--------------------------------------
+ id       | integer                |           | not null | nextval('products_id_seq'::regclass)
+ name     | character varying(100) |           |          |
+ price    | integer                |           |          |
+ category | character varying(100) |           |          |
+Indexes:
+    "products_pkey" PRIMARY KEY, btree (id)
+Referenced by:
+    TABLE "order_products" CONSTRAINT "order_products_product_id_fkey" FOREIGN KEY (product_id) REFERENCES products(id)
+
 ### orders
  - id
  - user_id
  - status
+
+                                     Table "public.orders"
+ Column  |          Type          | Collation | Nullable |              Default
+---------+------------------------+-----------+----------+------------------------------------
+ id      | integer                |           | not null | nextval('orders_id_seq'::regclass)
+ user_id | integer                |           |          |
+ status  | character varying(100) |           |          |
+Indexes:
+    "orders_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "orders_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id)
+Referenced by:
+    TABLE "order_products" CONSTRAINT "order_products_order_id_fkey" FOREIGN KEY (order_id) REFERENCES orders(id)
 
 ### order_product
  - id
  - order_id
  - product_id
  - quantity
+
+                              Table "public.order_products"
+   Column   |  Type   | Collation | Nullable |                  Default
+------------+---------+-----------+----------+--------------------------------------------
+ id         | integer |           | not null | nextval('order_products_id_seq'::regclass)
+ order_id   | integer |           |          |
+ product_id | integer |           |          |
+ quantity   | integer |           |          |
+Indexes:
+    "order_products_pkey" PRIMARY KEY, btree (id)
+Foreign-key constraints:
+    "order_products_order_id_fkey" FOREIGN KEY (order_id) REFERENCES orders(id)
+    "order_products_product_id_fkey" FOREIGN KEY (product_id) REFERENCES products(id)
 
 ### users
  - id
@@ -160,8 +198,27 @@ Add JWT verifyAuthTokenMiddleware . Make sure that JWTs are required for the rou
  - username
  - password
 
-### 6. QA and `README.md`
+                                      Table "public.users"
+  Column   |          Type          | Collation | Nullable |              Default
+-----------+------------------------+-----------+----------+-----------------------------------
+ id        | integer                |           | not null | nextval('users_id_seq'::regclass)
+ firstname | character varying(100) |           |          |
+ lastname  | character varying(100) |           |          |
+ username  | character varying(100) |           | not null |
+ password  | character varying(100) |           | not null |
+Indexes:
+    "users_pkey" PRIMARY KEY, btree (id)
+    "users_username_key" UNIQUE CONSTRAINT, btree (username)
+Referenced by:
+    TABLE "orders" CONSTRAINT "orders_user_id_fkey" FOREIGN KEY (user_id) REFERENCES users(id)
+
+
+### 6. server running
+ - port: 3000
+
+### 7. QA and `README.md`
 
 Before submitting, make sure that your project is complete with a `README.md`. Your `README.md` must include instructions for setting up and running your project including how you setup, run, and connect to your database. 
 
 Before submitting your project, spin it up and test each endpoint. If each one responds with data that matches the data shapes from the `REQUIREMENTS.md`, it is ready for submission!
+
